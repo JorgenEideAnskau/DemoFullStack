@@ -9,8 +9,24 @@ const tablebodyEl = document.getElementById("deviceTableBody");
 // TODO: fetch data from the API-Endpoints from the Controller use DOM and add {id, name, age_limit, type, director} to "tablebodyEl"
 document.getElementById("loadMovies").addEventListener("click", async () => {
     // Step 1: Fetch the response
-
+    const response = await fetch("/api/movies")
+    const data = await response.json()
+    tablebodyEl.innerHTML = "";
     // Step 2: When adding the elements to the DOM include a delete <button> (Will be added later)
+    data.forEach(element => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+        <td>${element.id}</td>
+        <td>${element.name}</td>
+        <td>${element.age_limit}</td>
+        <td>${element.type} </td>
+        <td>${element.director} </td>
+        <td>
+        <button class="btn btn-danger" id="slett">Delete</button>
+        </td>
+        `
+        tablebodyEl.append(row);
+    });
 })
 
 // function call
