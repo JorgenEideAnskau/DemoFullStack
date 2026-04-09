@@ -7,7 +7,7 @@ const tablebodyEl = document.getElementById("deviceTableBody");
 
 // Arrow func
 // TODO: fetch data from the API-Endpoints from the Controller use DOM and add {id, name, age_limit, type, director} to "tablebodyEl"
-document.getElementById("loadMovies").addEventListener("click", async () => {
+document.getElementById("#loadMovies").addEventListener("click", async () => {
     // Step 1: Fetch the response
 
     // Step 2: When adding the elements to the DOM include a delete <button> (Will be added later)
