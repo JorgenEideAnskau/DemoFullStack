@@ -10,6 +10,7 @@ import java.util.List;
 @RequestMapping("/api/movies")
 public class moviesController {
     private final MoviesRepository repository;
+
     public moviesController(MoviesRepository repository) {
         this.repository = repository;
     }
@@ -19,4 +20,22 @@ public class moviesController {
         return repository.getAllMovies();
     }
 
+    @PostMapping()
+    public Movies add(@RequestBody Movies movie) {
+        repository.addMovie(movie);
+        return movie;
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        repository.deleteMovie(id);
+    }
+
+    // Controller
+    @PutMapping("/{id}")
+    public Movies update(@PathVariable Long id, @RequestBody Movies movie) {
+        movie.setId(id);
+        repository.updateMovie(movie);
+        return movie;
+    }
 }

@@ -10,25 +10,37 @@ import java.util.List;
 @Repository
 public class MoviesRepository {
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate db;
+
+    protected RowMapper<Movies> moviesRowMapper = (rs, i) -> new Movies(
+            rs.getLong("id"),
+            rs.getString("name"),
+            rs.getInt("age_limit"),
+            rs.getString("type"),
+            rs.getString("director")
+    );
 
     public MoviesRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+        this.db = jdbcTemplate;
     }
-
-    protected static final RowMapper<Movies> moviesRowMapper = (rs, rowNum) ->
-            new Movies(
-                    rs.getLong("id"),
-                    rs.getString("name"),
-                    rs.getInt("age_limit"),
-                    rs.getString("type"),
-                    rs.getString("director")
-            );
 
     public List<Movies> getAllMovies() {
-        String sql = "SELECT * FROM movies";
-        return jdbcTemplate.query(sql, moviesRowMapper);
+        return db.query("SELECT * FROM movies", moviesRowMapper);
     }
 
+    public void addMovie(Movies movie) {
+        String sql = "INSERT INTO movies (name, age_limit, type, director) VALUES (?,?,?,?) RETURNING id";
+        Long id = db.queryForObject(sql, Long.class,
+                movie.getName(), movie.getAge_limit(), movie.getType(), movie.getDirector());
+        movie.setId(id);
+    }
 
+    public void deleteMovie(int id) {
+        db.update("DELETE FROM movies WHERE id = ?", id);
+    }
+
+    public void updateMovie(Movies movie) {
+        db.update("UPDATE movies SET name=?, age_limit=?, type=?, director=? WHERE id=?",
+                movie.getName(), movie.getAge_limit(), movie.getType(), movie.getDirector(), movie.getId());
+    }
 }

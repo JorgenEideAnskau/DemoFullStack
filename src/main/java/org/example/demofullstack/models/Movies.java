@@ -9,7 +9,7 @@ public class Movies {
     private String type;
     private String director;
 
-    public Movies(long id, String name, int age_limit, @NotNull String type, String director) {
+    public Movies(Long id, String name, int age_limit, String type, String director) {
         this.id = id;
         this.name = name;
         this.age_limit = age_limit;
@@ -17,11 +17,11 @@ public class Movies {
         this.director = director;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

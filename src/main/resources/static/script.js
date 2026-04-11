@@ -1,70 +1,124 @@
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("loaded");
-})
+const moviesTable = document.getElementById("deviceTableBody");
 
-// Get tableBody from the HTML file
-const tablebodyEl = document.getElementById("deviceTableBody");
-
-// Arrow func
-// TODO: fetch data from the API-Endpoints from the Controller use DOM and add {id, name, age_limit, type, director} to "tablebodyEl"
+// 1. Load movies
 document.getElementById("loadMovies").addEventListener("click", async () => {
-    // Step 1: Fetch the response
-    const response = await fetch("/api/movies")
-    const data = await response.json()
-    tablebodyEl.innerHTML = "";
-    // Step 2: When adding the elements to the DOM include a delete <button> (Will be added later)
-    data.forEach(element => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-        <td>${element.id}</td>
-        <td>${element.name}</td>
-        <td>${element.age_limit}</td>
-        <td>${element.type} </td>
-        <td>${element.director} </td>
+    const response = await fetch("api/movies");
+    const data = await response.json();
+    moviesTable.innerHTML = "";
+    data.forEach(movie => addMovieRow(movie));
+});
+
+// 2. Add empty row
+document.getElementById("addRow").addEventListener("click", () => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>-</td>
+        <td><input class="form-control" type="text"></td>
+        <td><input class="form-control" type="number"></td>
+        <td><input class="form-control" type="text"></td>
+        <td><input class="form-control" type="text"></td>
         <td>
-        <button class="btn btn-danger" id="slett">Delete</button>
+            <button class="btn btn-primary btn-sm btn-save">Save</button>
+            <button class="btn btn-secondary btn-sm btn-cancel">Cancel</button>
         </td>
-        `
-        tablebodyEl.append(row);
+    `;
+    moviesTable.append(row);
+    row.querySelector(".btn-save").addEventListener("click", () => saveRow(row));
+    row.querySelector(".btn-cancel").addEventListener("click", () => row.remove());
+});
+
+// 3. Save new row
+async function saveRow(row) {
+    const inputs = row.querySelectorAll("input");
+    const payload = {
+        name: inputs[0].value.trim(),
+        age_limit: Number(inputs[1].value),
+        type: inputs[2].value.trim(),
+        director: inputs[3].value.trim()
+    };
+
+    const response = await fetch("api/movies", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
     });
-})
 
-// function call
-// TODO: Add new movies to the table, with the method "POST", CREATE from CRUD
-document.getElementById("Add").addEventListener("click", addMovies);
+    if (!response.ok) { alert("Failed to add movie"); return; }
 
-async function addMovies(event) {
-    //
-    event.preventDefault();
-
-    // Step 1: Get the values from the 4 inputs in the form "addMovie" in the HTML-file.
-
-
-    // Step 2: Fetch the response from api-endpoint from the controller
-
-
-    // Step 3: Append the data to the tablebodyEL using a new tableRow (tr) with table data (td) and handle response not ok. (!Remember to give the user an error message)
-
+    const created = await response.json();
+    row.remove();
+    addMovieRow(created);
+    sortTable();
 }
 
-// TODO: Create a function to Update movies from the movie table, with the method "PUT"
-document.getElementById("update").addEventListener("click", async (event) => {
-    event.preventDefault();
-    // Step 1: Get the values from the 5 inputs in the form "updateMovie" in the HTML-file.
+// 4. Helper: add movie row
+function addMovieRow(movie) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+        <td>${movie.id}</td>
+        <td>${movie.name}</td>
+        <td>${movie.age_limit}</td>
+        <td>${movie.type}</td>
+        <td>${movie.director}</td>
+        <td>
+            <button class="btn btn-warning btn-sm btn-edit" data-id="${movie.id}">Edit</button>
+            <button class="btn btn-danger btn-sm btn-delete" data-id="${movie.id}">Delete</button>
+        </td>
+    `;
+    moviesTable.appendChild(row);
+    sortTable();
+}
 
+// 5. Delete and Edit handler (one listener for both)
+moviesTable.addEventListener("click", async (event) => {
+    const btn = event.target;
+    const row = btn.closest("tr");
+    const id = btn.dataset.id;
 
-    // Step 2: Fetch the response from api-endpoint from the controller.
+    // Delete
+    if (btn.classList.contains("btn-delete")) {
+        const response = await fetch(`api/movies/${id}`, {method: "DELETE"});
+        response.ok ? row.remove() : alert("Failed to delete");
+    }
 
+    // Edit: swap cells to inputs
+    if (btn.classList.contains("btn-edit")) {
+        const cells = row.querySelectorAll("td");
+        row.innerHTML = `
+            <td>${id}</td>
+            <td><input class="form-control" value="${cells[1].textContent}"></td>
+            <td><input class="form-control" type="number" value="${cells[2].textContent}"></td>
+            <td><input class="form-control" value="${cells[3].textContent}"></td>
+            <td><input class="form-control" value="${cells[4].textContent}"></td>
+            <td><button class="btn btn-success btn-sm btn-update" data-id="${id}">Save</button></td>
+        `;
+    }
 
-    // Step 3: Update the data to the tablebodyEL and handle response not ok. (!Remember to give the user an error message)
-})
+    // Save edit
+    if (btn.classList.contains("btn-update")) {
+        const inputs = row.querySelectorAll("input");
+        const payload = {
+            id: Number(id),
+            name: inputs[0].value.trim(),
+            age_limit: Number(inputs[1].value),
+            type: inputs[2].value.trim(),
+            director: inputs[3].value.trim()
+        };
 
-// TODO: Create a function to delete movies from the movie table, using the method "DELETE"
+        const response = await fetch(`api/movies/${id}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload)
+        });
 
-tablebodyEl.addEventListener("click", async (event) => {
-    event.preventDefault();
-
-    // Step 1: Use the delete-button created earlier, and delete a movie.
-
-    // Step 2: Make sure the table is updated after the deletion.
+        if (response.ok) { row.remove(); addMovieRow(payload); }
+        else { alert("Failed to update"); }
+    }
 });
+
+// Sorting table:
+function sortTable() {
+    const rows = [...moviesTable.querySelectorAll("tr")];
+    rows.sort((a, b) => Number(a.querySelector("td").textContent) - Number(b.querySelector("td").textContent));
+    rows.forEach(row => moviesTable.appendChild(row));
+}
