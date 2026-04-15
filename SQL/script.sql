@@ -16,9 +16,3 @@ VALUES ('Fast and The Furious', 12, 'Action, Crime, Adventure, Drama', 'Rob Cohe
 
 SELECT * FROM movies;
 
-SELECT m.name      AS MovieName,
-       m.age_limit AS AgeLimit,
-       m.type      AS Type,
-       m.director  AS Director
-FROM movies m
-ORDER BY m.name;

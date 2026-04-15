@@ -1,7 +1,5 @@
 package org.example.demofullstack.models;
 
-import org.jetbrains.annotations.NotNull;
-
 public class Movies {
     private Long id;
     private String name;

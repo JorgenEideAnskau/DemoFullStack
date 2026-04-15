@@ -66,7 +66,6 @@ function addMovieRow(movie) {
         </td>
     `;
     moviesTable.appendChild(row);
-    sortTable();
 }
 
 // 5. Delete and Edit handler (one listener for both)
@@ -115,10 +114,3 @@ moviesTable.addEventListener("click", async (event) => {
         else { alert("Failed to update"); }
     }
 });
-
-// Sorting table:
-function sortTable() {
-    const rows = [...moviesTable.querySelectorAll("tr")];
-    rows.sort((a, b) => Number(a.querySelector("td").textContent) - Number(b.querySelector("td").textContent));
-    rows.forEach(row => moviesTable.appendChild(row));
-}
