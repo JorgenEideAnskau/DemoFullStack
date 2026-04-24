@@ -29,10 +29,8 @@ public class MoviesRepository {
     }
 
     public void addMovie(Movies movie) {
-        String sql = "INSERT INTO movies (name, age_limit, type, director) VALUES (?,?,?,?) RETURNING id";
-        Long id = db.queryForObject(sql, Long.class,
-                movie.getName(), movie.getAge_limit(), movie.getType(), movie.getDirector());
-        movie.setId(id);
+        String sql = "INSERT INTO movies (name, age_limit, type, director) VALUES (?,?,?,?)";
+        db.update(sql, movies.getName(), movie.getAge_limit(), movie.getType(), movie.getDirector());
     }
 
     public void deleteMovie(int id) {
